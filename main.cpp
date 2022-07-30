@@ -47,11 +47,24 @@ int main(int argc, char *argv[])
     QNetworkAccessManager *manager = new QNetworkAccessManager();
     QNetworkReply *reply;
 
+    /*************************** запрос get ***************************/
     //manager->get(QNetworkRequest(QUrl("http://httpbin.org/get")));
     //QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);
 
-    manager->get(QNetworkRequest(QUrl("http://httpbin.org/headers")));
+    /************************* запрос headers *************************/
+    //manager->get(QNetworkRequest(QUrl("http://httpbin.org/headers")));
+    //QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);
+
+    /************************** запрос post ***************************/
+    QByteArray token;
+    token.append("Key");    // ключ
+    token.append('=');      // знак обязательный, так как делит ключ и значение
+    token.append("Value");  // значение
+
+    manager->post(QNetworkRequest(QUrl("http://httpbin.org/post")), token);
     QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);
+
+
 
     return a.exec();
 }
