@@ -21,6 +21,6 @@ add_executable(requests
 )
 target_link_libraries(requests PRIVATE Qt6::Network Qt${QT_VERSION_MAJOR}::Core)
 
-# добавил: target_link_libraries(main PRIVATE Qt6::Network) - не работает
-# было ранее: target_link_libraries(main Qt${QT_VERSION_MAJOR}::Core)
+# добавил: target_link_libraries(requests PRIVATE Qt6::Network) - не работает
+# было ранее: target_link_libraries(requests Qt${QT_VERSION_MAJOR}::Core)
 # mytarget
