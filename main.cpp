@@ -65,9 +65,12 @@ int main(int argc, char *argv[])
     QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);*/
 
     /*************************** запрос put ***************************/
-    manager->put(QNetworkRequest(QUrl("http://httpbin.org/put")), "30.07.2022");
-    QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);
+    //manager->put(QNetworkRequest(QUrl("http://httpbin.org/put")), "30.07.2022");
+    //QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);
 
+    /******************* запрос на удаление ресурса *******************/
+    manager->deleteResource(QNetworkRequest(QUrl("http://httpbin.org/")));
+    QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);
 
     return a.exec();
 }
