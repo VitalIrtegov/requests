@@ -56,14 +56,17 @@ int main(int argc, char *argv[])
     //QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);
 
     /************************** запрос post ***************************/
-    QByteArray token;
+    /*QByteArray token;
     token.append("Key");    // ключ
     token.append('=');      // знак обязательный, так как делит ключ и значение
     token.append("Value");  // значение
 
     manager->post(QNetworkRequest(QUrl("http://httpbin.org/post")), token);
-    QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);
+    QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);*/
 
+    /*************************** запрос put ***************************/
+    manager->put(QNetworkRequest(QUrl("http://httpbin.org/put")), "30.07.2022");
+    QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);
 
 
     return a.exec();
