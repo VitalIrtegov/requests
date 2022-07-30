@@ -2,6 +2,7 @@
 //#include <iostream>
 #include <QtNetwork>
 #include <QNetworkAccessManager>
+#include <QNetworkAccessManagerWithPatch.h>
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QDebug>
@@ -37,6 +38,8 @@ void resultRequest(QNetworkReply *reply) {
               // Array, Bool, Double
         }
 
+    } else {
+        qDebug()<< "reply->readAll(), error:  " << reply->errorString();
     }
 }
 
@@ -46,6 +49,8 @@ int main(int argc, char *argv[])
 
     QNetworkAccessManager *manager = new QNetworkAccessManager();
     QNetworkReply *reply;
+
+    QNetworkAccessManagerWithPatch *managerPatch = new QNetworkAccessManagerWithPatch();
 
     /*************************** запрос get ***************************/
     //manager->get(QNetworkRequest(QUrl("http://httpbin.org/get")));
@@ -64,13 +69,26 @@ int main(int argc, char *argv[])
     manager->post(QNetworkRequest(QUrl("http://httpbin.org/post")), token);
     QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);*/
 
-    /*************************** запрос put ***************************/
+    /*************************** запрос put через Array ***************************/
     //manager->put(QNetworkRequest(QUrl("http://httpbin.org/put")), "30.07.2022");
     //QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);
 
     /******************* запрос на удаление ресурса *******************/
-    manager->deleteResource(QNetworkRequest(QUrl("http://httpbin.org/")));
-    QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);
+    //manager->deleteResource(QNetworkRequest(QUrl("http://httpbin.org/")));
+    //QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);
+
+    QByteArray tokenPatch;
+    tokenPatch.append("KeyPatch");    // ключ
+    tokenPatch.append('=');      // знак обязательный, так как делит ключ и значение
+    tokenPatch.append("ValuePatch");  // значение
+
+    managerPatch->patch(QNetworkRequest(QUrl("http://httpbin.org/patch")), tokenPatch);
+    QObject::connect(managerPatch, &QNetworkAccessManagerWithPatch::finished, resultRequest);
+
+
+    //manager->sendCustomRequest(QNetworkRequest(QUrl("http://httpbin.org/patch")), "30.07.2022", token);
+    //QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);
+
 
     return a.exec();
 }

@@ -17,6 +17,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
 find_package(Qt6 REQUIRED COMPONENTS Network)
 
 add_executable(requests
+  QNetworkAccessManagerWithPatch.h
   main.cpp
 )
 target_link_libraries(requests PRIVATE Qt6::Network Qt${QT_VERSION_MAJOR}::Core)
