@@ -44,8 +44,37 @@ void resultRequest(QNetworkReply *reply) {
         }
 
     } else {
-        qDebug()<< "reply->readAll(), error:  " << reply->errorString();
+        qDebug() << "reply->readAll(), error:  " << reply->errorString();
     }
+}
+
+void webPageTitle(QNetworkReply *reply) {
+    QByteArray data = reply->readAll();
+
+    const char *ch1 = "<title>";
+    const char *ch2 = "</title>";
+    int index1 = 0;
+    int index2 = 0;
+
+    qsizetype i = 0;
+    while ((i = data.indexOf(ch1, i)) != -1) {
+        //cout << "Found <title> tag at index position " << i << Qt::endl;
+        index1 = i;
+        ++i;
+    }
+
+    qsizetype j = 0;
+    while ((j = data.indexOf(ch2, j)) != -1) {
+        //cout << "Found </title> tag at index position " << j << Qt::endl;
+        index2 = j;
+        ++j;
+    }
+
+    // преобразование набора символов char с строку string
+    QString str = QString("%1").arg(ch1);
+
+    qDebug() << data.mid(index1 + str.size(), index2 - (index1 + str.size()));
+    //qDebug() << data;  // вывод всей старницы в консоль
 }
 
 int main(int argc, char *argv[])
@@ -58,7 +87,7 @@ int main(int argc, char *argv[])
     QString adrUrl = "http://httpbin.org/";
     QString str;
 
-    cout << "\nEnter metod: "; cout.flush();
+    cout << "Enter metod: "; cout.flush();
     cin >> str;
     //cout << str; cout.flush();
 
@@ -102,11 +131,6 @@ int main(int argc, char *argv[])
         imagePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("image/png"));
         imagePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"image\""));
 
-        /*QFile *file = new QFile("image.png");
-        file->open(QIODevice::ReadOnly);
-        imagePart.setBodyDevice(file);
-        file->setParent(multiPart);*/
-
         QByteArray fileFlow;
         QFile file("image.png");
 
@@ -122,7 +146,16 @@ int main(int argc, char *argv[])
         QNetworkRequest request(url);
         managerPatch->patch(request, multiPart);
         QObject::connect(managerPatch, &QNetworkAccessManagerWithPatch::finished, resultRequest);
+    } else if (str == "title") {
+        QUrl url("http://httpbin.org");
+        QNetworkRequest request(url);
+        manager->get(request);
+        QObject::connect(manager, &QNetworkAccessManagerWithPatch::finished, webPageTitle);
     }
+        /*QFile *file = new QFile("image.png");
+        file->open(QIODevice::ReadOnly);
+        imagePart.setBodyDevice(file);
+        file->setParent(multiPart);*/
 
     return a.exec();
 }
