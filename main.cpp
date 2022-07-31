@@ -77,7 +77,39 @@ int main(int argc, char *argv[])
     //manager->deleteResource(QNetworkRequest(QUrl("http://httpbin.org/")));
     //QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);
 
+    /************************** запрос patch **************************/
+    QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+    QHttpPart textPart;
 
+    textPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"text\""));
+    textPart.setBody("my text");
+
+    QHttpPart imagePart;
+    imagePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("image/png"));
+    imagePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"image\""));
+
+    /*
+    QFile *file = new QFile("image.png");
+    file->open(QIODevice::ReadOnly);
+    imagePart.setBodyDevice(file);
+    file->setParent(multiPart);
+    */
+
+    QByteArray fileFlow;
+    QFile file("image.png");
+
+    if(file.open(QIODevice::ReadOnly)){
+        fileFlow = file.readAll();
+        imagePart.setBody(fileFlow.toBase64());
+    }
+
+    multiPart->append(textPart);
+    multiPart->append(imagePart);
+
+    QUrl url("http://httpbin.org/patch");
+    QNetworkRequest request(url);
+    managerPatch->patch(request, multiPart);
+    QObject::connect(managerPatch, &QNetworkAccessManagerWithPatch::finished, resultRequest);
 
     //manager->sendCustomRequest(QNetworkRequest(QUrl("http://httpbin.org/patch")), "30.07.2022", token);
     //QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);
