@@ -9,6 +9,11 @@
 #include <QUrl>
 #include <QFile>
 #include <QByteArray>
+#include <QString>
+#include <QTextStream>
+
+QTextStream cout(stdout);
+QTextStream cin(stdin);
 
 void resultRequest(QNetworkReply *reply) {
     QByteArray data = reply->readAll();
@@ -48,72 +53,76 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
 
     QNetworkAccessManager *manager = new QNetworkAccessManager();
-    QNetworkReply *reply;
-
     QNetworkAccessManagerWithPatch *managerPatch = new QNetworkAccessManagerWithPatch();
 
-    /*************************** запрос get ***************************/
-    //manager->get(QNetworkRequest(QUrl("http://httpbin.org/get")));
-    //QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);
+    QString adrUrl = "http://httpbin.org/";
+    QString str;
 
-    /************************* запрос headers *************************/
-    //manager->get(QNetworkRequest(QUrl("http://httpbin.org/headers")));
-    //QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);
+    cout << "\nEnter metod: "; cout.flush();
+    cin >> str;
+    //cout << str; cout.flush();
 
-    /************************** запрос post ***************************/
-    /*QByteArray token;
-    token.append("Key");    // ключ
-    token.append('=');      // знак обязательный, так как делит ключ и значение
-    token.append("Value");  // значение
+    if (str == "get") {
+        QUrl url(adrUrl + str);
+        QNetworkRequest request(url);
+        manager->get(request);
+        QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);
+    } else if (str == "headers") {
+        QUrl url(adrUrl + str);
+        QNetworkRequest request(url);
+        manager->get(request);
+        QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);
+    } else if (str == "post") {
+        QByteArray token;
+        token.append("Key");    // ключ
+        token.append('=');      // знак обязательный, так как делит ключ и значение
+        token.append("Value");  // значение
+        QUrl url(adrUrl + str);
+        QNetworkRequest request(url);
+        manager->post(request, token);
+        QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);
+    } else if (str == "put") {
+        QUrl url(adrUrl + str);
+        QNetworkRequest request(url);
+        manager->put(request, "30.07.2022");
+        QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);
+    } else if (str == "delete") {
+        QUrl url(adrUrl);
+        QNetworkRequest request(url);
+        manager->deleteResource(request);
+        QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);
+    } else if (str == "patch") {
+        QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+        QHttpPart textPart;
 
-    manager->post(QNetworkRequest(QUrl("http://httpbin.org/post")), token);
-    QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);*/
+        textPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"text\""));
+        textPart.setBody("my text");
 
-    /*************************** запрос put через Array ***************************/
-    //manager->put(QNetworkRequest(QUrl("http://httpbin.org/put")), "30.07.2022");
-    //QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);
+        QHttpPart imagePart;
+        imagePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("image/png"));
+        imagePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"image\""));
 
-    /******************* запрос на удаление ресурса *******************/
-    //manager->deleteResource(QNetworkRequest(QUrl("http://httpbin.org/")));
-    //QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);
+        /*QFile *file = new QFile("image.png");
+        file->open(QIODevice::ReadOnly);
+        imagePart.setBodyDevice(file);
+        file->setParent(multiPart);*/
 
-    /************************** запрос patch **************************/
-    QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
-    QHttpPart textPart;
+        QByteArray fileFlow;
+        QFile file("image.png");
 
-    textPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"text\""));
-    textPart.setBody("my text");
+        if(file.open(QIODevice::ReadOnly)){
+            fileFlow = file.readAll();
+            imagePart.setBody(fileFlow.toBase64());
+        }
 
-    QHttpPart imagePart;
-    imagePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("image/png"));
-    imagePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"image\""));
+        multiPart->append(textPart);
+        multiPart->append(imagePart);
 
-    /*
-    QFile *file = new QFile("image.png");
-    file->open(QIODevice::ReadOnly);
-    imagePart.setBodyDevice(file);
-    file->setParent(multiPart);
-    */
-
-    QByteArray fileFlow;
-    QFile file("image.png");
-
-    if(file.open(QIODevice::ReadOnly)){
-        fileFlow = file.readAll();
-        imagePart.setBody(fileFlow.toBase64());
+        QUrl url(adrUrl + str);
+        QNetworkRequest request(url);
+        managerPatch->patch(request, multiPart);
+        QObject::connect(managerPatch, &QNetworkAccessManagerWithPatch::finished, resultRequest);
     }
-
-    multiPart->append(textPart);
-    multiPart->append(imagePart);
-
-    QUrl url("http://httpbin.org/patch");
-    QNetworkRequest request(url);
-    managerPatch->patch(request, multiPart);
-    QObject::connect(managerPatch, &QNetworkAccessManagerWithPatch::finished, resultRequest);
-
-    //manager->sendCustomRequest(QNetworkRequest(QUrl("http://httpbin.org/patch")), "30.07.2022", token);
-    //QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);
-
 
     return a.exec();
 }
