@@ -77,13 +77,6 @@ int main(int argc, char *argv[])
     //manager->deleteResource(QNetworkRequest(QUrl("http://httpbin.org/")));
     //QObject::connect(manager, &QNetworkAccessManager::finished, resultRequest);
 
-    QByteArray tokenPatch;
-    tokenPatch.append("KeyPatch");    // ключ
-    tokenPatch.append('=');      // знак обязательный, так как делит ключ и значение
-    tokenPatch.append("ValuePatch");  // значение
-
-    managerPatch->patch(QNetworkRequest(QUrl("http://httpbin.org/patch")), tokenPatch);
-    QObject::connect(managerPatch, &QNetworkAccessManagerWithPatch::finished, resultRequest);
 
 
     //manager->sendCustomRequest(QNetworkRequest(QUrl("http://httpbin.org/patch")), "30.07.2022", token);
